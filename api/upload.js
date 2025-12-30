@@ -35,7 +35,6 @@ export default async function handler(req, res) {
       })
     }
 
-    // bersihkan base64
     image = image
       .replace(/^data:image\/\w+;base64,/, "")
       .replace(/\s/g, "")
@@ -81,4 +80,5 @@ export default async function handler(req, res) {
         err?.response?.data ||
         err.message
     })
-  }}
+  }
+      }
