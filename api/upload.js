@@ -35,10 +35,10 @@ export default async function handler(req, res) {
       })
     }
 
-    // 🔥 pastikan base64 bersih
+    // ✅ bersihkan base64
     image = image
-  .replace(/^data:image\/\w+;base64,/, "")
-  .replace(/\s/g, "")
+      .replace(/^data:image\/\w+;base64,/, "")
+      .replace(/\s/g, "")
 
     const filename =
       `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
@@ -72,10 +72,11 @@ export default async function handler(req, res) {
     })
 
   } catch (err) {
-    console.error("UPLOAD ERROR:", err.message)
+    console.error("UPLOAD ERROR:", err.response?.data || err.message)
+
     res.status(500).json({
       status: false,
-      message: err.message
+      message: err.response?.data?.message || err.message
     })
   }
 }
