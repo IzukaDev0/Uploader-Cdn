@@ -1,5 +1,6 @@
-export const GITHUB_TOKEN = process.env.GITHUB_TOKEN
-export const GITHUB_REPO = "IzukaDev0/Uploader-Cdn"
-export const GITHUB_BRANCH = "main"
+// config/settings.js
 
-export const DEFAULT_FOLDER = "cdn"
+export const GITHUB_TOKEN = process.env.GITHUB_TOKEN
+export const GITHUB_REPO = process.env.GITHUB_REPO
+export const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main"
+export const DEFAULT_FOLDER = process.env.DEFAULT_FOLDER || "cdn"
