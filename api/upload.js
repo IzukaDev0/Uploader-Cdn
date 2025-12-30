@@ -23,8 +23,12 @@ export default async function handler(req, res) {
   }
 
   try {
+    // 🔎 VALIDASI ENV
     if (!GITHUB_TOKEN || !GITHUB_REPO) {
-      throw new Error("GitHub config belum lengkap")
+      return res.status(500).json({
+        status: false,
+        message: "Server config error: GitHub ENV belum di-set"
+      })
     }
 
     let { image } = req.body
@@ -35,6 +39,7 @@ export default async function handler(req, res) {
       })
     }
 
+    // bersihkan base64
     image = image
       .replace(/^data:image\/\w+;base64,/, "")
       .replace(/\s/g, "")
