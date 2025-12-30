@@ -1,6 +1,5 @@
-// config/settings.js
-
-export const GITHUB_TOKEN = process.env.GITHUB_TOKEN
-export const GITHUB_REPO = process.env.GITHUB_REPO
-export const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main"
-export const DEFAULT_FOLDER = process.env.DEFAULT_FOLDER || "cdn"
+module.exports = {
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_KEY: process.env.SUPABASE_KEY,
+  SUPABASE_BUCKET: process.env.SUPABASE_BUCKET || "uploads"
+}
