@@ -81,5 +81,4 @@ export default async function handler(req, res) {
         err?.response?.data ||
         err.message
     })
-  }
-                      }
+  }}
