@@ -6,6 +6,14 @@ import {
   DEFAULT_FOLDER
 } from "./config/settings.js"
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "10mb"
+    }
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -28,7 +36,9 @@ export default async function handler(req, res) {
     }
 
     // 🔥 pastikan base64 bersih
-    image = image.replace(/^data:image\/\w+;base64,/, "")
+    image = image
+  .replace(/^data:image\/\w+;base64,/, "")
+  .replace(/\s/g, "")
 
     const filename =
       `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
