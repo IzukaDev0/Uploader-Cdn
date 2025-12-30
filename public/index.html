@@ -176,22 +176,6 @@
 </div>
 
 <script>
-  /* ===== THEME ===== */
-  const toggle = document.getElementById("themeToggle")
-  const root = document.documentElement
-
-  const savedTheme = localStorage.getItem("theme") || "light"
-  root.dataset.theme = savedTheme
-  toggle.textContent = savedTheme === "dark" ? "🌙" : "☀️"
-
-  toggle.onclick = () => {
-    const next = root.dataset.theme === "dark" ? "light" : "dark"
-    root.dataset.theme = next
-    localStorage.setItem("theme", next)
-    toggle.textContent = next === "dark" ? "🌙" : "☀️"
-  }
-
-  /* ===== FILE PICKER ===== */
   const fileInput = document.getElementById("fileInput")
   const pickFile = document.getElementById("pickFile")
   const fileName = document.getElementById("fileName")
@@ -200,11 +184,11 @@
   pickFile.onclick = () => fileInput.click()
 
   fileInput.onchange = () => {
-    if (!fileInput.files[0]) return
-    fileName.textContent = fileInput.files[0].name
+    fileName.textContent = fileInput.files[0]
+      ? fileInput.files[0].name
+      : "Belum ada file dipilih"
   }
 
-  /* ===== REAL UPLOAD ===== */
   uploadBtn.onclick = async () => {
     if (!fileInput.files[0]) {
       alert("Pilih file dulu")
@@ -214,28 +198,34 @@
     uploadBtn.disabled = true
     uploadBtn.textContent = "Uploading..."
 
-    const formData = new FormData()
-    formData.append("file", fileInput.files[0])
+    const reader = new FileReader()
 
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData
-      })
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result.split(",")[1]
 
-      const data = await res.json()
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ image: base64 })
+        })
 
-      if (!res.ok) throw data
+        const data = await res.json()
+        if (!data.status) throw data
 
-      alert("Upload berhasil!\n" + data.url)
-
-    } catch (err) {
-      alert("Upload gagal")
-      console.error(err)
-    } finally {
-      uploadBtn.disabled = false
-      uploadBtn.textContent = "Upload"
+        alert("Upload berhasil!\n" + data.url)
+      } catch (e) {
+        alert("Upload gagal")
+        console.error(e)
+      } finally {
+        uploadBtn.disabled = false
+        uploadBtn.textContent = "Upload"
+      }
     }
+
+    reader.readAsDataURL(fileInput.files[0])
   }
 </script>
 
