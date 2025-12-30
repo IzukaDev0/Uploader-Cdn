@@ -1,33 +1,27 @@
-const { createClient } = require('@supabase/supabase-js')
-const fs = require('fs')
-const path = require('path')
+const { createClient } = require("@supabase/supabase-js")
+const fs = require("fs")
+const settings = require("../config/settings")
 
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
+  settings.SUPABASE_URL,
+  settings.SUPABASE_KEY
 )
 
-async function uploadToSupabase(filePath, originalName, mime) {
+async function uploadFile(filePath, filename, mime) {
   const buffer = fs.readFileSync(filePath)
-
-  const filename = Date.now() + '_' + originalName.replace(/\s+/g, '_')
-  const filePathInBucket = `uploads/${filename}`
+  const name = Date.now() + "_" + filename.replace(/\s+/g, "_")
 
   const { error } = await supabase
     .storage
-    .from(process.env.SUPABASE_BUCKET)
-    .upload(filePathInBucket, buffer, {
+    .from(settings.SUPABASE_BUCKET)
+    .upload(name, buffer, {
       contentType: mime,
       upsert: true
     })
 
   if (error) throw error
 
-  const publicUrl =
-    `${process.env.SUPABASE_URL}` +
-    `/storage/v1/object/public/${process.env.SUPABASE_BUCKET}/${filePathInBucket}`
-
-  return publicUrl
+  return `${settings.SUPABASE_URL}/storage/v1/object/public/${settings.SUPABASE_BUCKET}/${name}`
 }
 
-module.exports = uploadToSupabase
+module.exports = uploadFile
