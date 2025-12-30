@@ -166,7 +166,7 @@
     </button>
 
     <div class="file-name" id="fileName">
-      Belum ada file dipilih
+     Belum ada file dipilih
     </div>
 
     <button class="upload-btn" id="uploadBtn">
@@ -202,23 +202,28 @@
 
     reader.onload = async () => {
       try {
-        const base64 = reader.result.split(",")[1]
-
+        // ✅ KIRIM FULL BASE64 (JANGAN DI SPLIT)
         const res = await fetch("/api/upload", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ image: base64 })
+          body: JSON.stringify({
+            image: reader.result
+          })
         })
 
         const data = await res.json()
-        if (!data.status) throw data
 
-        alert("Upload berhasil!\n" + data.url)
-      } catch (e) {
-        alert("Upload gagal")
-        console.error(e)
+        if (!res.ok || !data.status) {
+          throw new Error(data.message || "Upload gagal")
+        }
+
+        alert("✅ Upload berhasil!\n\n" + data.url)
+
+      } catch (err) {
+        alert("❌ Upload gagal\n\n" + err.message)
+        console.error("FRONTEND ERROR:", err)
       } finally {
         uploadBtn.disabled = false
         uploadBtn.textContent = "Upload"
