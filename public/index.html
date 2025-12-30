@@ -8,28 +8,26 @@
   <style>
     /* ===== THEME ===== */
     :root {
-      --bg: #f8fafc;       /* putih susu */
+      --bg: #f8fafc;
       --card: #ffffff;
       --text: #020617;
-      --button: #dc2626;   /* merah */
+      --button: #dc2626;
       --border: #e5e7eb;
     }
 
     [data-theme="dark"] {
-      --bg: #000000;       /* AMOLED */
-      --card: #020617;
+      --bg: #000000;
+      --card: #050505;
       --text: #ffffff;
-      --button: #dc2626;   /* merah */
-      --border: #1f2933;
+      --button: #dc2626;
+      --border: #111111;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
     }
@@ -47,16 +45,9 @@
       z-index: 10;
     }
 
-    .toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
     .toolbar-left img {
       width: 32px;
       height: 32px;
-      object-fit: contain;
     }
 
     .toolbar-center {
@@ -65,6 +56,7 @@
     }
 
     .toolbar-right button {
+      transition: transform .25s ease;
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text);
@@ -72,6 +64,10 @@
       border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
+    }
+
+    .toolbar-right button:active {
+      transform: rotate(180deg) scale(1.2);
     }
 
     /* ===== CONTENT ===== */
@@ -93,7 +89,6 @@
       margin-bottom: 20px;
     }
 
-    /* ===== FILE PICKER ===== */
     .file-btn {
       width: 100%;
       padding: 12px;
@@ -112,8 +107,8 @@
       text-align: center;
     }
 
-    /* ===== UPLOAD BUTTON ===== */
     .upload-btn {
+      transition: transform .15s ease, box-shadow .15s ease;
       margin-top: 16px;
       width: 100%;
       padding: 14px;
@@ -126,52 +121,87 @@
       cursor: pointer;
     }
 
+    .upload-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 8px 25px rgba(220,38,38,.6);
+    }
+
     .upload-btn:disabled {
       opacity: .6;
       cursor: not-allowed;
     }
 
-    .hidden {
-      display: none;
+    .hidden { display: none }
+
+    .result-card {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      animation: fadeUp .35s ease;
+    }
+
+    .result-card h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .result-card input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .result-card button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: var(--button);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px) }
+      to { opacity: 1; transform: translateY(0) }
     }
   </style>
 </head>
 <body>
 
-<!-- ===== TOOLBAR ===== -->
 <div class="toolbar">
   <div class="toolbar-left">
-    <img src="/assets/logo.png" alt="Logo">
+    <img src="/assets/logo.png">
   </div>
-
-  <div class="toolbar-center">
-    Izuka Uploader
-  </div>
-
+  <div class="toolbar-center">Izuka Uploader</div>
   <div class="toolbar-right">
     <button id="themeToggle">🌙</button>
   </div>
 </div>
 
-<!-- ===== CARD ===== -->
 <div class="container">
   <div class="card">
     <h1>CDN Upload</h1>
 
-    <!-- hidden input -->
-    <input type="file" id="fileInput" hidden />
+    <input type="file" id="fileInput" hidden>
+    <button class="file-btn" id="pickFile">Pilih File</button>
 
-    <button class="file-btn" id="pickFile">
-      Pilih File
-    </button>
+    <div class="file-name" id="fileName">Belum ada file dipilih</div>
 
-    <div class="file-name" id="fileName">
-     Belum ada file dipilih
+    <button class="upload-btn" id="uploadBtn">Upload</button>
+
+    <div id="result" class="result-card hidden">
+      <h3>✅ Upload Berhasil</h3>
+      <input type="text" id="resultUrl" readonly>
+      <button onclick="copyLink()">📋 Copy Link</button>
     </div>
-
-    <button class="upload-btn" id="uploadBtn">
-      Upload
-    </button>
   </div>
 </div>
 
@@ -182,9 +212,12 @@
   const uploadBtn = document.getElementById("uploadBtn")
   const toggle = document.getElementById("themeToggle")
   const root = document.documentElement
+  const result = document.getElementById("result")
+  const resultUrl = document.getElementById("resultUrl")
 
   const saved = localStorage.getItem("theme")
   if (saved) root.setAttribute("data-theme", saved)
+  if (saved === "dark") toggle.textContent = "☀️"
 
   toggle.onclick = () => {
     const isDark = root.getAttribute("data-theme") === "dark"
@@ -192,6 +225,7 @@
     localStorage.setItem("theme", isDark ? "light" : "dark")
     toggle.textContent = isDark ? "🌙" : "☀️"
   }
+
   pickFile.onclick = () => fileInput.click()
 
   fileInput.onchange = () => {
@@ -201,44 +235,29 @@
   }
 
   uploadBtn.onclick = async () => {
-    if (!fileInput.files[0]) {
-      alert("Pilih file dulu")
-      return
-    }
+    if (!fileInput.files[0]) return alert("Pilih file dulu")
 
+    result.classList.add("hidden")
     uploadBtn.disabled = true
-    uploadBtn.textContent = "Uploading..."
+    uploadBtn.textContent = "Uploading ⏳"
 
     const reader = new FileReader()
-
     reader.onload = async () => {
       try {
-        // ✅ KIRIM FULL BASE64 (JANGAN DI SPLIT)
         const res = await fetch("/api/upload", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            image: reader.result
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: reader.result })
         })
 
         const data = await res.json()
+        if (!res.ok || !data.status) throw new Error(data.message)
 
-        if (!res.ok || !data.status) {
-          throw new Error(data.message || "Upload gagal")
-        }
+        resultUrl.value = data.url
+        result.classList.remove("hidden")
 
-        fileName.innerHTML = `
-<a href="${data.url}" target="_blank">
-  ${data.url}
-</a>
-`
-
-      } catch (err) {
-        alert("❌ Upload gagal\n\n" + err.message)
-        console.error("FRONTEND ERROR:", err)
+      } catch (e) {
+        alert("❌ Upload gagal\n\n" + e.message)
       } finally {
         uploadBtn.disabled = false
         uploadBtn.textContent = "Upload"
@@ -247,7 +266,13 @@
 
     reader.readAsDataURL(fileInput.files[0])
   }
+
+  function copyLink() {
+    resultUrl.select()
+    navigator.clipboard.writeText(resultUrl.value)
+    alert("Link berhasil disalin!")
+  }
 </script>
 
 </body>
-</html>
+    </html>
