@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       })
     }
 
-    // ✅ bersihkan base64
+    // bersihkan base64
     image = image
       .replace(/^data:image\/\w+;base64,/, "")
       .replace(/\s/g, "")
@@ -66,17 +66,20 @@ export default async function handler(req, res) {
     const rawUrl =
       `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${path}`
 
-    res.status(200).json({
+    return res.status(200).json({
       status: true,
       url: rawUrl
     })
 
   } catch (err) {
-    console.error("UPLOAD ERROR:", err.response?.data || err.message)
+    console.error("UPLOAD ERROR:", err?.response?.data || err.message)
 
-    res.status(500).json({
+    return res.status(err?.response?.status || 500).json({
       status: false,
-      message: err.response?.data?.message || err.message
+      message:
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        err.message
     })
   }
-}
+                      }
