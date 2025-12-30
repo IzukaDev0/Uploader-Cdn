@@ -2,10 +2,16 @@
   "version": 2,
   "routes": [
     {
-      "src": "/upload/(.*)",
+      "src": "^/api/upload$",
+      "dest": "/api/upload.js"
+    },
+    {
+      "src": "^/upload/(.*)",
       "dest": "/api/cdn/$1"
     },
-    { "src": "/api/upload", "dest": "/api/upload.js" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
   ]
 }
