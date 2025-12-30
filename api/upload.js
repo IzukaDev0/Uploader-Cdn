@@ -45,13 +45,12 @@ export default async function handler(req, res) {
 
     if (error) throw error
 
-    const { data } = supabase.storage
-      .from(process.env.SUPABASE_BUCKET)
-      .getPublicUrl(filename)
+    // 🔥 GANTI DI SINI (JANGAN PAKAI getPublicUrl)
+    const cdnUrl = `https://cdn.xrizaldev.my.id/upload/${filename}`
 
     return res.status(200).json({
       status: true,
-      url: data.publicUrl
+      url: cdnUrl
     })
 
   } catch (err) {
